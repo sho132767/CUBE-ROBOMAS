@@ -1,5 +1,6 @@
 /* USER CODE BEGIN Header */
 /**
+ * 
   ******************************************************************************
   * @file           : main.c
   * @brief          : ROBOMASTER M2006 Motor Control (Single Motor)
@@ -11,29 +12,40 @@
 #include "stm32f4xx_hal.h"
 #include <stdio.h>
 #include <string.h>
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+CAN_HandleTypeDef hcan1;
+UART_HandleTypeDef huart2;
+/* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PV */
+#define MOTOR_ID 1
+#define CAN_TX_ID 0x200
+char uart_buf[64];  
+int target_current = 0;
+int motor_angle = 0;
+int motor_rpm = 0;
+int motor_current = 0;
+int motor_temp = 0;
+/* USER CODE END PV */
 
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
 /* USER CODE BEGIN 0 */
 
 /**
-  * @brief 
+  * @brief
   */
-#define MOTOR_ID 1 
-#define CAN_TX_ID 0x200
 
-CAN_HandleTypeDef hcan1;
-UART_HandleTypeDef huart2;
-
-int16_t motor_angle = 0;
-int16_t motor_rpm = 0;
-int16_t motor_current = 0;
-uint8_t motor_temp = 0;
-
-
-int16_t target_current = 0;
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -133,20 +145,19 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   */
 int main(void)
 {
-    char uart_buf[100];
-    uint32_t last_time = 0;
 
-    /* MCU Configuration */
-    HAL_Init();
-    SystemClock_Config();
-
-    /* Initialize peripherals */
-    MX_GPIO_Init();
-    MX_USART2_UART_Init();
-    MX_CAN1_Init();
-lklskswksksksksksxz
     /* USER CODE BEGIN 2 */
+	    uint32_t last_time = 0;
+ 
 
+
+	    HAL_Init();
+	    SystemClock_Config();
+
+
+	    MX_GPIO_Init();
+	    MX_USART2_UART_Init();
+	    MX_CAN1_Init();
 
     CAN_Filter_Config();
 
@@ -155,8 +166,6 @@ lklskswksksksksksxz
     {
         Error_Handler();
     }
-
-
     if (HAL_CAN_Start(&hcan1) != HAL_OK)
     {
         Error_Handler();
@@ -167,16 +176,15 @@ lklskswksksksksksxz
     HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, strlen(uart_buf), 100);
 
     /* USER CODE END 2 */
-
+    
     /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
     while (1)
     {
-
-        target_current = 3000;
-
-
-        CAN_Send_Current(target_current);
-
+        /*USER CODE END WHILE */
+        /* USER CODE BEGIN 3 */
+    	 target_current = 3000;
+    	 CAN_Send_Current(target_current);
         if (HAL_GetTick() - last_time >= 100)
         {
             last_time = HAL_GetTick();
@@ -188,6 +196,7 @@ lklskswksksksksksxz
 
         HAL_Delay(1);
     }
+    /*USER CODE END 3 */
 }
 
 /**
@@ -195,6 +204,7 @@ lklskswksksksksksxz
   */
 void SystemClock_Config(void)
 {
+
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
