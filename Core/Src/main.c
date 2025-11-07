@@ -13,13 +13,19 @@
 #include <string.h>
 
 /* Private define ------------------------------------------------------------*/
-#define MOTOR_ID 1
-#define CAN_TX_ID 0x200
 
 /* Private variables ---------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+/**
+  * @brief 
+  */
+#define MOTOR_ID 1 
+#define CAN_TX_ID 0x200
+
 CAN_HandleTypeDef hcan1;
 UART_HandleTypeDef huart2;
-
 
 int16_t motor_angle = 0;
 int16_t motor_rpm = 0;
@@ -29,19 +35,12 @@ uint8_t motor_temp = 0;
 
 int16_t target_current = 0;
 
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_CAN1_Init(void);
 void CAN_Filter_Config(void);
 void CAN_Send_Current(int16_t current);
-
-/* USER CODE BEGIN 0 */
-
-/**
-  * @brief  CANフィルタの設定
-  */
 void CAN_Filter_Config(void)
 {
     CAN_FilterTypeDef filter;
@@ -75,22 +74,19 @@ void CAN_Send_Current(int16_t current)
     uint8_t TxData[8] = {0};
     uint32_t TxMailbox;
 
-
-    if (current > 10000) current = 10000;
+    if (current > 10000) current = 10000;     // 上限は後述
     if (current < -10000) current = -10000;
 
+    TxHeader.StdId = CAN_TX_ID;               // 0x200
+    TxHeader.ExtId = 0;
+    TxHeader.IDE   = CAN_ID_STD;
+    TxHeader.RTR   = CAN_RTR_DATA;
+    TxHeader.DLC   = 8;
+    TxHeader.TransmitGlobalTime = DISABLE;
 
-    TxHeader.StdId = CAN_TX_ID;
-    TxHeader.IDE = CAN_ID_STD;
-    TxHeader.RTR = CAN_RTR_DATA;
-    TxHeader.DLC = 8;
-
-
-
-    uint8_t offset = (MOTOR_ID - 1) * 2;
-    TxData[offset] = (current >> 8) & 0xFF;
-    TxData[offset + 1] = current & 0xFF;
-
+    uint8_t offset = (MOTOR_ID - 1) * 2;      // MOTOR_ID=1 → Byte0/1
+    TxData[offset]     = (uint8_t)((current >> 8) & 0xFF);
+    TxData[offset + 1] = (uint8_t)( current       & 0xFF);
 
     if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox) != HAL_OK)
     {
@@ -98,14 +94,16 @@ void CAN_Send_Current(int16_t current)
     }
 }
 
+
+
 /**
   * @brief
-  * @note   M2006受信データフォーマット:
-  *         受信ID: 0x201-0x208
-  *         Byte0-1: エンコーダ角度 (0-8191)
-  *         Byte2-3: 回転速度 (RPM)
-  *         Byte4-5: 実電流値 (トルク電流)
-  *         Byte6:   温度 (°C)
+  * @note   M2006:
+  *         ID: 0x201-0x208
+  *         Byte0-1: (0-8191)
+  *         Byte2-3:  (RPM)
+  *         Byte4-5:()
+  *         Byte6:    (°C)
   */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
@@ -146,7 +144,7 @@ int main(void)
     MX_GPIO_Init();
     MX_USART2_UART_Init();
     MX_CAN1_Init();
-
+lklskswksksksksksxz
     /* USER CODE BEGIN 2 */
 
 
@@ -188,7 +186,7 @@ int main(void)
             HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, strlen(uart_buf), 100);
         }
 
-        HAL_Delay(10);
+        HAL_Delay(1);
     }
 }
 
