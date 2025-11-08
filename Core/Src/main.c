@@ -21,7 +21,7 @@
 /* USER CODE BEGIN PTD */
 CAN_HandleTypeDef hcan1;
 UART_HandleTypeDef huart2;
-char uart_buf[64];  
+char uart_buf[64];
 int target_current = 0;
 int motor_angle = 0;
 int motor_rpm = 0;
@@ -106,7 +106,7 @@ void CAN_Send_Current(int16_t current)
     uint8_t TxData[8] = {0};
     uint32_t TxMailbox;
 
-    if (current > 10000) current = 10000;     
+    if (current > 10000) current = 10000;
     if (current < -10000) current = -10000;
 
     TxHeader.StdId = CAN_TX_ID;               // 0x200
@@ -150,10 +150,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         if (RxHeader.StdId == expected_id && RxHeader.IDE == CAN_ID_STD)
         {
 
-            motor_angle = (RxData[0] << 8) | RxData[1];      
-            motor_rpm = (RxData[2] << 8) | RxData[3];        
-            motor_current = (RxData[4] << 8) | RxData[5];    
-            motor_temp = RxData[6];                           
+            motor_angle = (RxData[0] << 8) | RxData[1];
+            motor_rpm = (RxData[2] << 8) | RxData[3];
+            motor_current = (RxData[4] << 8) | RxData[5];
+            motor_temp = RxData[6];
         }
     }
 }
@@ -168,7 +168,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -195,19 +195,7 @@ int main(void)
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
 	    uint32_t last_time = 0;
-
-
-
-	    HAL_Init();
-	    SystemClock_Config();
-
-
-	    MX_GPIO_Init();
-	    MX_USART2_UART_Init();
-	    MX_CAN1_Init();
-
-    CAN_Filter_Config();
-
+	    CAN_Filter_Config();
 
     if (HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
     {
@@ -222,7 +210,7 @@ int main(void)
     sprintf(uart_buf, "ROBOMASTER M2006 Motor Control Started (Motor ID: %d)\r\n", MOTOR_ID);
     HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, strlen(uart_buf), 100);
 
-  /* USER CODE END 2 */
+  /* USER CODE END2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -231,7 +219,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    	 target_current = 20000;
+    	 target_current = 1000;
     	 CAN_Send_Current(target_current);
         if (HAL_GetTick() - last_time >= 100)
         {
@@ -242,7 +230,7 @@ int main(void)
             HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, strlen(uart_buf), 100);
         }
 
-        HAL_Delay(1);
+        HAL_Delay(10);
     }
   /* USER CODE END 3 */
 }
