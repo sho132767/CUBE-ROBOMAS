@@ -106,7 +106,7 @@ void CAN_Send_Current(int16_t current)
     uint8_t TxData[8] = {0};
     uint32_t TxMailbox;
 
-    if (current > 10000) current = 10000;     // 上限は後述
+    if (current > 10000) current = 10000;     
     if (current < -10000) current = -10000;
 
     TxHeader.StdId = CAN_TX_ID;               // 0x200
@@ -150,10 +150,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         if (RxHeader.StdId == expected_id && RxHeader.IDE == CAN_ID_STD)
         {
 
-            motor_angle = (RxData[0] << 8) | RxData[1];      // 角度 (0-8191)
-            motor_rpm = (RxData[2] << 8) | RxData[3];        // RPM
-            motor_current = (RxData[4] << 8) | RxData[5];    // 実電流
-            motor_temp = RxData[6];                          // 温度
+            motor_angle = (RxData[0] << 8) | RxData[1];      
+            motor_rpm = (RxData[2] << 8) | RxData[3];        
+            motor_current = (RxData[4] << 8) | RxData[5];    
+            motor_temp = RxData[6];                           
         }
     }
 }
@@ -231,7 +231,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    	 target_current = 3000;
+    	 target_current = 20000;
     	 CAN_Send_Current(target_current);
         if (HAL_GetTick() - last_time >= 100)
         {
